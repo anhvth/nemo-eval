@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+"""
+Compare evaluation results from multiple runs.
+
+Usage:
+    python src/compare_summary.py results/run1 results/run2
+    python src/compare_summary.py results/run1 results/run2 --out comparison.md
+"""
+
 import sys
 import glob
 import os

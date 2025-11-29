@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+"""
+Print evaluation results summary for a single run.
+
+Usage:
+    python src/print_summary.py results/qwen4b-dolci-eval
+    python src/print_summary.py results/qwen4b-2507-eval
+"""
+
 import sys
 import glob
 import os
@@ -163,7 +172,7 @@ def format_summary_table(all_metrics):
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python print_summary_table.py <run_directory>", file=sys.stderr)
+        print("Usage: python src/print_summary.py <run_directory>", file=sys.stderr)
         sys.exit(1)
 
     # Handle the case where the user might provide the directory with a trailing slash

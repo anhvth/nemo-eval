@@ -1,5 +1,5 @@
-# Config for evaluating Qwen 4B SFT model
-# Run with: nemo-evaluator-launcher run --config-dir custom-eval --config-name qwen4b_config
+# Config for evaluating Dolci (fine-tuned Qwen 4B) model
+# Run with: nemo-evaluator-launcher run --config configs/dolci_config.yaml
 
 defaults:
   - execution: local

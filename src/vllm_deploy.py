@@ -1,3 +1,13 @@
+#!/usr/bin/env python3
+"""
+Deploy vLLM workers with Nginx load balancer.
+
+Usage:
+    python src/vllm_deploy.py -m Qwen/Qwen3-4B-Instruct-2507
+    python src/vllm_deploy.py -m /path/to/model --gpus 01,23,45,67
+    python src/vllm_deploy.py -m my-model --gpus 01,23 --port 8080 --start-port 8000
+"""
+
 import os
 import subprocess
 import shutil

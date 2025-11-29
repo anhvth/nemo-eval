@@ -1,5 +1,5 @@
-# Config for evaluating Qwen 4B SFT model
-# Run with: nemo-evaluator-launcher run --config-dir custom-eval --config-name qwen4b_config
+# Config for evaluating Qwen3-4B-Instruct-2507 (baseline) model
+# Run with: nemo-evaluator-launcher run --config configs/qwen2507_config.yaml
 
 defaults:
   - execution: local
