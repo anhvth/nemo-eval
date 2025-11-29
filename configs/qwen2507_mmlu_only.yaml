@@ -1,0 +1,38 @@
+# Config for re-running only lm-evaluation-harness.mmlu task
+# Run with: nemo-evaluator-launcher run --config configs/qwen2507_mmlu_only.yaml
+
+defaults:
+  - execution: local
+  - deployment: none
+  - _self_
+
+execution:
+  output_dir: results/qwen4b-2507-eval-mmlu-rerun
+  extra_docker_args: "--volume /hf-home:/root/.cache/huggingface"
+  mode: parallel
+
+target:
+  api_endpoint:
+    model_id: Qwen/Qwen3-4B-Instruct-2507
+    url: http://10.102.28.24:8000/v1/completions
+
+evaluation:
+  nemo_evaluator_config:
+    config:
+      params:
+        request_timeout: 3600
+        parallelism: 64
+        extra:
+          tokenizer: Qwen/Qwen3-4B-Instruct-2507
+          tokenizer_backend: huggingface
+    target:
+      api_endpoint:
+        adapter_config:
+          use_reasoning: false
+          use_system_prompt: true
+  tasks:
+    - name: lm-evaluation-harness.mmlu
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8000/v1/completions

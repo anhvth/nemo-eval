@@ -5,11 +5,13 @@ Print evaluation results summary for a single run.
 Usage:
     python src/print_summary.py results/qwen4b-dolci-eval
     python src/print_summary.py results/qwen4b-2507-eval
+    python src/print_summary.py dd2ff1945857184c --out /tmp/report.md
 """
 
 import sys
 import glob
 import os
+import argparse
 import yaml
 
 # NOTE: This script requires the PyYAML library. You may need to install it:
@@ -171,12 +173,22 @@ def format_summary_table(all_metrics):
     return "\n".join(output)
 
 def main():
-    if len(sys.argv) != 2:
-        print("Usage: python src/print_summary.py <run_directory>", file=sys.stderr)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Print evaluation results summary for a single run.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    python src/print_summary.py results/qwen4b-dolci-eval
+    python src/print_summary.py dd2ff1945857184c --out /tmp/report.md
+        """
+    )
+    parser.add_argument("run_directory", help="Path to the run directory containing results")
+    parser.add_argument("--out", "-o", dest="output_file", help="Output file path to write the markdown report")
+    
+    args = parser.parse_args()
 
     # Handle the case where the user might provide the directory with a trailing slash
-    run_dir = sys.argv[1].rstrip('/')
+    run_dir = args.run_directory.rstrip('/')
     
     # We rely on the user having PyYAML installed in their environment for this script to run.
     try:
@@ -184,7 +196,7 @@ def main():
             print(f"Error: Directory '{run_dir}' not found.", file=sys.stderr)
             sys.exit(1)
             
-        print(f"--- Processing results in directory: {run_dir} ---\n")
+        print(f"--- Processing results in directory: {run_dir} ---\n", file=sys.stderr)
         
         all_metrics = load_all_results(run_dir)
         
@@ -194,9 +206,14 @@ def main():
 
         markdown_table = format_summary_table(all_metrics)
         
-        print(markdown_table)
+        if args.output_file:
+            with open(args.output_file, 'w') as f:
+                f.write(markdown_table)
+            print(f"Report written to: {args.output_file}", file=sys.stderr)
+        else:
+            print(markdown_table)
         
-        print(f"\n--- End of Summary for {run_dir} ---")
+        print(f"\n--- End of Summary for {run_dir} ---", file=sys.stderr)
 
     except Exception as e:
         print(f"\nAn unexpected error occurred: {e}", file=sys.stderr)

@@ -1,29 +1,34 @@
-# Config for evaluating Dolci (fine-tuned Qwen 4B) model
-# Run with: nemo-evaluator-launcher run --config configs/dolci_config.yaml
+# Config for evaluating Dolci (fine-tuned Qwen 4B) model using local vLLM backend
+# Run with: nemo-evaluator-launcher run --config configs/dolci_config_vllm.yaml
 
 defaults:
   - execution: local
-  - deployment: none
+  - deployment: vllm
   - _self_
 
 execution:
-  output_dir: results/qwen4b-dolci-eval
-  # Mount local HuggingFace cache to persist downloaded tokenizers/datasets between runs
-  # --add-host allows container to reach host's vLLM server
-  extra_docker_args: "--volume /hf-home:/root/.cache/huggingface --add-host=host.docker.internal:host-gateway"
-  # mode: parallel
-target:
-  api_endpoint:
-    model_id: qwen4b-dolci
-    url: http://host.docker.internal:8000/v1/chat/completions
+  output_dir: results/qwen4b-dolci-eval-vllm
+  extra_docker_args: "--volume /hf-home:/root/.cache/huggingface --volume /home/anh/projects/nemo-rl/results:/models"
+  env_vars:
+    deployment:
+      HF_TOKEN: ${oc.env:HF_TOKEN}
+  mode: parallel
+# Deployment configuration (vLLM)
+deployment:
+  checkpoint_path: null
+  hf_model_handle: /models/qwen4b-dolci-step3992-hf
+  served_model_name: qwen4b-dolci
+  tensor_parallel_size: 2
+  data_parallel_size: 4  # 4 replicas x 2 GPUs each = 8 GPUs total
+  extra_args: "--max-model-len 32768 --gpu-memory-utilization 0.95 --trust-remote-code"
 
-# For SFT/chat models, use chat-based evaluations
+# Evaluation configuration
 evaluation:
   nemo_evaluator_config:
     config:
       params:
         request_timeout: 3600
-        parallelism: 1024
+        parallelism: 64
         extra:
           tokenizer: Qwen/Qwen3-4B-Instruct-2507
           tokenizer_backend: huggingface
@@ -32,6 +37,9 @@ evaluation:
         adapter_config:
           use_reasoning: false
           use_system_prompt: true
+  env_vars:
+    HF_TOKEN: HF_TOKEN
+
   tasks:
     # Chat-based tasks for SFT model (endpoint_type: chat)
     - name: ifeval
@@ -46,39 +54,39 @@ evaluation:
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: winogrande
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: lm-evaluation-harness.mmlu
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: openbookqa
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: piqa
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: social_iqa
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: adlr_arc_challenge_llama
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions
     - name: adlr_truthfulqa_mc2
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8000/v1/completions
+            type: completions

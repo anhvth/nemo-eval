@@ -1,0 +1,1 @@
+nemo-evaluator-launcher run --config configs/dolci_config_vllm.yaml
