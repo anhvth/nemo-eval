@@ -1,0 +1,85 @@
+# Config for evaluating Qwen 4B SFT model
+# Run with: nemo-evaluator-launcher run --config-dir custom-eval --config-name qwen4b_config
+
+defaults:
+  - execution: local
+  - deployment: none
+  - _self_
+
+execution:
+  output_dir: results/qwen4b-2507-eval
+  # Mount local HuggingFace cache to persist downloaded tokenizers/datasets between runs
+  extra_docker_args: "--volume /hf-home:/root/.cache/huggingface"
+  mode: parallel
+target:
+  api_endpoint:
+    model_id: Qwen/Qwen3-4B-Instruct-2507
+    url: http://10.102.28.24:8080/v1/chat/completions
+
+# For SFT/chat models, use chat-based evaluations
+evaluation:
+  nemo_evaluator_config:
+    config:
+      params:
+        request_timeout: 3600
+        parallelism: 64
+        extra:
+          # Tokenizer required for log-probability (completions-based) tasks
+          # Must be a HuggingFace Hub model name (accessible inside Docker container)
+          tokenizer: Qwen/Qwen3-4B-Instruct-2507
+          tokenizer_backend: huggingface
+    target:
+      api_endpoint:
+        adapter_config:
+          use_reasoning: false
+          use_system_prompt: true
+  tasks:
+    # Chat-based tasks for SFT model (endpoint_type: chat)
+    - name: ifeval
+    - name: gpqa_diamond_cot
+      env_vars:
+        HF_TOKEN: HF_TOKEN
+    - name: gsm8k_cot_llama
+    - name: mgsm_cot
+    - name: mmlu_instruct
+    # Completions-based tasks (log-probability) - require tokenizer and completions endpoint
+    - name: hellaswag
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: winogrande
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: lm-evaluation-harness.mmlu
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: openbookqa
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: piqa
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: social_iqa
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: adlr_arc_challenge_llama
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
+    - name: adlr_truthfulqa_mc2
+      nemo_evaluator_config:
+        target:
+          api_endpoint:
+            url: http://10.102.28.24:8080/v1/completions
