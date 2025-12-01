@@ -1,5 +1,5 @@
-# Config for evaluating Dolci (fine-tuned Qwen 4B) model
-# Run with: nemo-evaluator-launcher run --config configs/dolci_config.yaml
+# Config for evaluating Qwen3-4B base model
+# Run with: nemo-evaluator-launcher run --config configs/qwen4b_config.yaml
 
 defaults:
   - execution: local
@@ -7,15 +7,15 @@ defaults:
   - _self_
 
 execution:
-  output_dir: results/qwen4b-dolci-eval
+  output_dir: results/qwen4b-eval
   # Mount local HuggingFace cache to persist downloaded tokenizers/datasets between runs
   # --add-host allows container to reach host's vLLM server
   extra_docker_args: "--volume /hf-home:/root/.cache/huggingface --add-host=host.docker.internal:host-gateway"
   # mode: parallel
 target:
   api_endpoint:
-    model_id: qwen4b-dolci
-    url: http://host.docker.internal:8002/v1/chat/completions
+    model_id: Qwen/Qwen3-4B
+    url: http://host.docker.internal:8001/v1/chat/completions
 
 # For SFT/chat models, use chat-based evaluations
 evaluation:
@@ -25,7 +25,7 @@ evaluation:
         request_timeout: 3600
         parallelism: 1024
         extra:
-          tokenizer: Qwen/Qwen3-4B-Instruct-2507
+          tokenizer: Qwen/Qwen3-4B
           tokenizer_backend: huggingface
     target:
       api_endpoint:
@@ -46,39 +46,39 @@ evaluation:
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: winogrande
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: lm-evaluation-harness.mmlu
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: openbookqa
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: piqa
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: social_iqa
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: adlr_arc_challenge_llama
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
     - name: adlr_truthfulqa_mc2
       nemo_evaluator_config:
         target:
           api_endpoint:
-            url: http://host.docker.internal:8002/v1/completions
+            url: http://host.docker.internal:8001/v1/completions
